@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Habits & Budget</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef2ee;--card:#fff;--tx:#17241d;--mu:#66776d;--ac:#14724f;--soft:#d6ebdf;--bd:#dbe3dd;--rd:#c0392b;--gold:#b7791f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101613;--card:#18211c;--tx:#e8f0eb;--mu:#8da197;--ac:#4cc38a;--soft:#1f3a2e;--bd:#2a3a31;--rd:#ef7766;--gold:#e0b04a}}
+:root[data-theme="dark"]{--bg:#101613;--card:#18211c;--tx:#e8f0eb;--mu:#8da197;--ac:#4cc38a;--soft:#1f3a2e;--bd:#2a3a31;--rd:#ef7766;--gold:#e0b04a}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 "Trebuchet MS","Segoe UI",Roboto,sans-serif;padding:0 0 84px}
+main{max-width:520px;margin:0 auto;padding:14px}
+h1{font-size:22px;margin:4px 0 12px;letter-spacing:-.3px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}.sp{justify-content:space-between}
+.mu{color:var(--mu);font-size:13px}
+button{font:inherit;color:inherit;cursor:pointer}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nav button{background:var(--card);border:1px solid var(--bd);border-radius:10px;width:44px;height:40px;font-size:20px}
+.nav b{font-size:18px}
+.bar{height:10px;background:var(--soft);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:6px}
+.bar.over i{background:var(--rd)}
+.h{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid var(--bd);padding:12px 2px;text-align:left}
+.h:last-child{border-bottom:0}
+.bx{width:28px;height:28px;border-radius:8px;border:2px solid var(--mu);flex:none;display:grid;place-items:center;font-size:17px;color:#fff}
+.on .bx{background:var(--ac);border-color:var(--ac)}
+.on .nm{text-decoration:line-through;opacity:.6}
+.nm{flex:1}.st{font-size:13px;color:var(--gold)}
+.wk{display:flex;gap:6px;align-items:flex-end;height:80px;margin:8px 0}
+.wk button{flex:1;background:none;border:0;padding:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
+.wk span{width:100%;background:var(--soft);border-radius:6px 6px 2px 2px;display:block}
+.wk .sel span{background:var(--ac)}.wk small{font-size:11px;color:var(--mu)}
+input{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px;width:100%;min-width:0}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700}
+.btn.g{background:none;color:var(--ac);border:1px solid var(--bd)}
+.x{background:none;border:0;color:var(--rd);font-size:20px;padding:4px 8px}
+.big{font-size:28px;font-weight:800;letter-spacing:-.5px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.grid3 b{display:block;font-size:17px}
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-size:12px}
+th,td{padding:2px;text-align:center}
+th.nm2{position:sticky;left:0;background:var(--card);text-align:left;min-width:92px;max-width:92px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:6px;font-weight:600}
+.c{display:block;width:22px;height:22px;border-radius:6px;background:var(--soft);cursor:pointer}
+.c.on{background:var(--ac)}
+th.td{color:var(--ac);font-weight:800}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabs button{flex:1;background:none;border:0;padding:8px 4px;border-radius:10px;font-weight:700;color:var(--mu)}
+.tabs button.a{color:var(--ac);background:var(--soft)}
+.ex{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bd);padding:8px 0}
+.ex:last-child{border-bottom:0}.ex .nm{flex:1}
+label{font-size:13px;color:var(--mu);display:block;margin-bottom:4px}
+</style></head><body><main id="app"></main>
+<nav class="tabs" id="tabs"></nav>
+<script>
+const K='habitbudget1';
+let S={cur:'₹',habits:[{id:'h1',n:'No smoking'},{id:'h2',n:'No alcohol'},{id:'h3',n:'15k steps'},{id:'h4',n:'Learn Kubernetes (K8s)'},{id:'h5',n:'Reading'},{id:'h6',n:'Gym'}],done:{},budget:{},exp:[]};
+try{const x=JSON.parse(localStorage.getItem(K));if(x&&x.habits)S=x}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const pad=n=>String(n).padStart(2,'0');
+const ds=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const today=()=>ds(new Date());
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>S.cur+Math.round(n).toLocaleString('en-IN');
+let V={tab:'today',day:today(),mon:today().slice(0,7),edit:false};
+const dim=m=>new Date(+m.slice(0,4),+m.slice(5,7),0).getDate();
+const isDone=(h,d)=>(S.done[d]||[]).includes(h);
+function toggle(h,d){let a=S.done[d]||[];a=a.includes(h)?a.filter(x=>x!==h):a.concat(h);S.done[d]=a;save()}
+const pct=d=>S.habits.length?S.habits.filter(h=>isDone(h.id,d)).length/S.habits.length:0;
+function streak(h,d){let c=0,x=pd(d);if(!isDone(h,ds(x)))x.setDate(x.getDate()-1);while(isDone(h,ds(x))){c++;x.setDate(x.getDate()-1)}return c}
+function getB(m){if(S.budget[m]!=null)return S.budget[m];const k=Object.keys(S.budget).filter(x=>x<m).sort().pop();return k?S.budget[k]:0}
+function bs(m){const B=getB(m),t=today(),L=S.exp.filter(e=>e.d.startsWith(m)),sp=L.reduce((a,e)=>a+e.a,0),D=dim(m);
+ let allow=B/D,ts=0;
+ if(t.startsWith(m)){const td=+t.slice(8),before=L.filter(e=>e.d<t).reduce((a,e)=>a+e.a,0);allow=Math.max(0,(B-before)/(D-td+1));ts=L.filter(e=>e.d===t).reduce((a,e)=>a+e.a,0)}
+ return{B,sp,L,left:B-sp,allow,ts}}
+const mname=m=>new Date(+m.slice(0,4),+m.slice(5,7)-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const shiftM=(m,n)=>{const d=new Date(+m.slice(0,4),+m.slice(5,7)-1+n,1);return ds(d).slice(0,7)};
+const shiftD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ds(d)};
+
+function vToday(){
+ const d=V.day,p=Math.round(pct(d)*100),t=pd(d),b=bs(d.slice(0,7));
+ const off=(t.getDay()+6)%7,mon=shiftD(d,-off);let wk='',sum=0;
+ for(let i=0;i<7;i++){const x=shiftD(mon,i),q=pct(x);sum+=q;wk+=`<button data-a="day" data-d="${x}" class="${x===d?'sel':''}"><span style="height:${Math.max(4,q*100)}%"></span><small>${'MTWTFSS'[i]}</small></button>`}
+ let hs=S.habits.map(h=>{const on=isDone(h.id,d),s=streak(h.id,d);
+  return `<div class="row" style="${V.edit?'':'display:block'}">${V.edit?`<input value="${esc(h.n)}" data-a="ren" data-h="${h.id}" style="margin:4px 0"><button class="x" data-a="del" data-h="${h.id}">✕</button>`:
+  `<button class="h ${on?'on':''}" data-a="tg" data-h="${h.id}" data-d="${d}"><span class="bx">${on?'✓':''}</span><span class="nm">${esc(h.n)}</span>${s>1?`<span class="st">🔥 ${s}</span>`:''}</button>`}</div>`}).join('');
+ if(!S.habits.length)hs='<p class="mu">No habits yet. Tap Edit habits to add one.</p>';
+ return `<h1>Daily check-in</h1>
+ <div class="nav"><button data-a="day" data-d="${shiftD(d,-1)}">‹</button><b>${t.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}${d===today()?' (today)':''}</b><button data-a="day" data-d="${shiftD(d,1)}">›</button></div>
+ <div class="card"><div class="row sp"><b>${p}% done</b><span class="mu">${S.habits.filter(h=>isDone(h.id,d)).length} of ${S.habits.length}</span></div><div class="bar" style="margin-top:8px"><i style="width:${p}%"></i></div></div>
+ <div class="card">${hs}${V.edit?`<div class="row" style="margin-top:10px"><input id="nh" placeholder="New habit, e.g. 2 L water"><button class="btn" data-a="add">Add</button></div>`:''}
+ <button class="btn g" style="margin-top:10px;width:100%" data-a="edit">${V.edit?'Done editing':'Edit habits'}</button></div>
+ <div class="card"><div class="row sp"><b>This week</b><span class="mu">Average ${Math.round(sum/7*100)}%</span></div><div class="wk">${wk}</div></div>
+ <div class="card"><div class="row sp"><b>Money</b><span class="mu">${mname(d.slice(0,7))}</span></div>
+ <div class="grid3" style="margin-top:8px"><div><span class="mu">Spent today</span><b>${money(b.ts)}</b></div><div><span class="mu">Daily limit</span><b>${money(b.allow)}</b></div><div><span class="mu">Left today</span><b style="color:${b.allow-b.ts<0?'var(--rd)':'var(--ac)'}">${money(b.allow-b.ts)}</b></div></div></div>`}
+
+function vMonth(){
+ const m=V.mon,D=dim(m),t=today();let hd='<th class="nm2"></th>',rows='';
+ for(let i=1;i<=D;i++)hd+=`<th class="${m+'-'+pad(i)===t?'td':''}">${i}</th>`;
+ const el=t.startsWith(m)?+t.slice(8):(t>m?D:0);
+ rows=S.habits.map(h=>`<tr><th class="nm2">${esc(h.n)}</th>${Array.from({length:D},(_,i)=>{const d=m+'-'+pad(i+1);return `<td><i class="c ${isDone(h.id,d)?'on':''}" data-a="tg" data-h="${h.id}" data-d="${d}"></i></td>`}).join('')}</tr>`).join('');
+ let wks='';
+ for(let w=0;w<Math.ceil(D/7);w++){const a=w*7+1,z=Math.min(D,a+6),dd=[];for(let i=a;i<=z&&i<=el;i++)dd.push(pct(m+'-'+pad(i)));
+  const p=dd.length?Math.round(dd.reduce((x,y)=>x+y,0)/dd.length*100):0;
+  wks+=`<div style="margin:10px 0"><div class="row sp"><span>Week ${w+1} <span class="mu">(${a}–${z})</span></span><b>${dd.length?p+'%':'–'}</b></div><div class="bar"><i style="width:${p}%"></i></div></div>`}
+ const hp=S.habits.map(h=>{let c=0;for(let i=1;i<=el;i++)if(isDone(h.id,m+'-'+pad(i)))c++;const p=el?Math.round(c/el*100):0;
+  return `<div style="margin:10px 0"><div class="row sp"><span>${esc(h.n)}</span><span class="mu">${c}/${el} days · <b>${p}%</b></span></div><div class="bar"><i style="width:${p}%"></i></div></div>`}).join('');
+ return `<h1>Month view</h1><div class="nav"><button data-a="mon" data-n="-1">‹</button><b>${mname(m)}</b><button data-a="mon" data-n="1">›</button></div>
+ <div class="card"><div class="scroll"><table><tr>${hd}</tr>${rows}</table></div><p class="mu" style="margin:8px 0 0">Tap a square to mark a day done.</p></div>
+ <div class="card"><b>Weekly progress</b>${wks}</div><div class="card"><b>By habit</b>${hp}</div>`}
+
+function vBudget(){
+ const m=V.mon,b=bs(m),pc=b.B?Math.min(100,b.sp/b.B*100):0,cur=today().startsWith(m);
+ const list=b.L.slice().sort((x,y)=>y.d.localeCompare(x.d)||y.id-x.id).map(e=>`<div class="ex"><div class="nm">${esc(e.n||'Expense')}<div class="mu">${pd(e.d).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div></div><b>${money(e.a)}</b><button class="x" data-a="dx" data-id="${e.id}">✕</button></div>`).join('')||'<p class="mu">No spending recorded this month.</p>';
+ return `<h1>Budget</h1><div class="nav"><button data-a="mon" data-n="-1">‹</button><b>${mname(m)}</b><button data-a="mon" data-n="1">›</button></div>
+ <div class="card"><label>Total budget for this month</label><div class="row"><input id="bud" type="number" inputmode="decimal" value="${b.B||''}" placeholder="e.g. 30000"><button class="btn" data-a="sb">Save</button></div>
+ <div style="margin-top:14px" class="row sp"><span class="mu">Spent ${money(b.sp)} of ${money(b.B)}</span><b style="color:${b.left<0?'var(--rd)':'var(--ac)'}">${b.left<0?'Over by '+money(-b.left):money(b.left)+' left'}</b></div>
+ <div class="bar ${b.left<0?'over':''}" style="margin-top:6px"><i style="width:${pc}%"></i></div></div>
+ <div class="card"><div class="grid3"><div><span class="mu">${cur?'Spend per day':'Avg per day'}</span><b>${money(b.allow)}</b></div><div><span class="mu">Spent today</span><b>${money(b.ts)}</b></div><div><span class="mu">Left today</span><b style="color:${b.allow-b.ts<0?'var(--rd)':'var(--ac)'}">${money(b.allow-b.ts)}</b></div></div>
+ ${cur?'<p class="mu" style="margin:10px 0 0">Daily limit = money left at the start of today ÷ days remaining in the month.</p>':''}</div>
+ <div class="card"><b>Add spending</b><div class="row" style="margin:10px 0"><input id="ea" type="number" inputmode="decimal" placeholder="Amount"><input id="en" placeholder="What for?"></div>
+ <div class="row"><input id="ed" type="date" value="${cur?today():m+'-01'}"><button class="btn" data-a="ae">Add</button></div></div>
+ <div class="card"><b>Spending this month</b><div style="margin-top:6px">${list}</div></div>
+ <div class="card"><label>Currency symbol</label><input id="cur" value="${esc(S.cur)}" maxlength="4" data-a="cur"></div>`}
+
+function render(){
+ const v=V.tab==='today'?vToday():V.tab==='month'?vMonth():vBudget();
+ document.getElementById('app').innerHTML=v;
+ document.getElementById('tabs').innerHTML=[['today','✅ Today'],['month','📅 Month'],['budget','💰 Budget']].map(([k,l])=>`<button data-a="tab" data-t="${k}" class="${V.tab===k?'a':''}">${l}</button>`).join('')}
+
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-a]');if(!el||el.tagName==='INPUT')return;const a=el.dataset.a,g=id=>document.getElementById(id);
+ if(a==='tab'){V.tab=el.dataset.t}
+ else if(a==='day'){V.day=el.dataset.d}
+ else if(a==='tg'){toggle(el.dataset.h,el.dataset.d)}
+ else if(a==='mon'){V.mon=shiftM(V.mon,+el.dataset.n)}
+ else if(a==='edit'){V.edit=!V.edit}
+ else if(a==='del'){S.habits=S.habits.filter(h=>h.id!==el.dataset.h);save()}
+ else if(a==='add'){const n=g('nh').value.trim();if(n){S.habits.push({id:'h'+Date.now(),n});save()}}
+ else if(a==='sb'){const v=parseFloat(g('bud').value);S.budget[V.mon]=isNaN(v)?0:v;save()}
+ else if(a==='ae'){const x=parseFloat(g('ea').value),d=g('ed').value;if(!(x>0)||!d){g('ea').focus();return}S.exp.push({id:Date.now(),d,a:x,n:g('en').value.trim()});save();V.mon=d.slice(0,7)}
+ else if(a==='dx'){S.exp=S.exp.filter(x=>x.id!==+el.dataset.id);save()}
+ render()});
+document.addEventListener('change',e=>{const el=e.target,a=el.dataset.a;
+ if(a==='ren'){const h=S.habits.find(x=>x.id===el.dataset.h);if(h&&el.value.trim()){h.n=el.value.trim();save()}}
+ if(a==='cur'){S.cur=el.value||'₹';save();render()}});
+render();
+</script></body></html>
